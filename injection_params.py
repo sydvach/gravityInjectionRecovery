@@ -2,10 +2,7 @@ import numpy as np
 import pandas as pd
 
 def make_injection_params(separations_mas, contrasts):
-    # Prepare an empty list for all parameter sets
     rows = []
-    
-    # Loop over separation and magnitude, and sample random phases
     for sep in separations_mas:
         for contrast in contrasts:
             # Random position angles in degrees (0–360)
@@ -21,11 +18,12 @@ def make_injection_params(separations_mas, contrasts):
                     "deltaDec_mas": round(delta_dec, 4)
                 })
     
-    # Convert to DataFrame
+    
     param_table = pd.DataFrame(rows)
+    param_table['folderName'] = np.arange(len(param_table))
     return param_table
 
-separations_mas = np.linspace(0, 65, 5)   # fibre FWHM is 65 mas(?)
+separations_mas = np.linspace(0, 40, 5)   # fibre FWHM is 65 mas(?)
 contrasts = np.array([1e-2, 1e-3, 1e-4, 1e-5, 1e-6])
 param_table = make_injection_params(separations_mas, contrasts)
 param_table.to_csv("injection_parameters.csv", index=False)
