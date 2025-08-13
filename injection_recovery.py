@@ -1,5 +1,5 @@
 from astropy.io import fits
-import glob
+import glob, os
 from datetime import datetime
 
 import matplotlib.pyplot as plt
@@ -98,7 +98,7 @@ def openReducedStar(starFile, visPlanet):
 def createSyntheticCompanion(wav, visPhased, uCoord, vCoord, visOnStar, contrast, deltaRA, deltaDec):
     ## synthetic Companioin signal
     ## as per Pourré, N., et al.: A&A, 686, A258 (2024):
-    ## Vsyn,comp = C*Vonstar * exp[(-i2pi/lambda)(OPD)]exp[i phi]
+    ## Vsyn,comp = C*Vonstar * exp[(-i2pi/lambda)(OPD)]exp[i phi] : need to come back to check on if this phase term is properly accounted for!!!!!
 
     opd = uCoord * deltaRA + vCoord * deltaDec
     # print(np.shape(opd))
@@ -112,7 +112,20 @@ def createSyntheticCompanion(wav, visPhased, uCoord, vCoord, visOnStar, contrast
     visSyntheticComp = visPointing + contrast * visOnStar * phaseShift
     return visSyntheticComp
         
-
+def saveSyntheticReducedData(planetFile, visSyntheticComp, i):
+    hdul = fits.open(planetFile)
+    oi_vis = fits.getdata(planetFile, extname = "OI_VIS", extver = 10)
+    visData = oi_vis.field("VISDATA")
+    print(visData)
+    for hdu in hdul:
+        if hdu.header.get('EXTNAME') == 'OI_VIS':
+#            oi_vis_hdu = hdu
+            ndit, nbase, nwave = np.shape(visSyntheticComp)
+            visSyntheticReshaped = visSyntheticComp.reshape(ndit * nbase, nwave)
+            hdu.data['VISDATA'] = visSyntheticReshaped
+            break
+    print(hdul[5].data['VISDATA'])
+    
 
 def performInjectionRecovery(files, injectionParams):
     for planetFile, starFile in files:
@@ -134,6 +147,8 @@ def performInjectionRecovery(files, injectionParams):
                                      contrasts[i], 
                                      deltaRAs_rad[i], 
                                      deltaDecs_rad[i])
+                                     
+            saveSyntheticReducedData(planetFile, syntheticVISDATA, i)
             
 
     
@@ -155,8 +170,12 @@ def performInjectionRecovery(files, injectionParams):
 
 if __name__ == '__main__':
 
-    filePath = '/Users/svach/GravityGaia/p115/2025-08-10/hd14082B/reduced/*_astroreduced.fits'
-    allFiles, starFiles, planetFiles = getFiles(filePath)
+    filePath = '/Users/svach/GravityGaia/p115/2025-08-10/hd14082B/reduced/'
+    #create new directory for synthetic data if doesn't exist
+    os.makedirs(filePath + 'synthetic_reduced', exist_ok=True) 
+    
+    reducedFiles = filePath + '_astroreduced.fits'
+    allFiles, starFiles, planetFiles = getFiles(reducedFiles)
     files = assignStar_to_Planets(allFiles, starFiles, planetFiles)
 
     injectionParams = pd.read_csv('injection_parameters.csv')
