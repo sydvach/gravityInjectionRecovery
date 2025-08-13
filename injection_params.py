@@ -14,9 +14,9 @@ def make_injection_params(separations_mas, contrasts):
                 delta_ra = sep * np.cos(phase)
                 delta_dec = sep * np.sin(phase)
                 rows.append({
-                    "contrast": contrast,
-                    "sep_mas": round(sep, 3),
-                    "phase_deg": round(np.degrees(phase), 3),
+                    "Contrast": contrast,
+                    "Sep_mas": round(sep, 3),
+                    "Phase_deg": round(np.degrees(phase), 3),
                     "deltaRA_mas": round(delta_ra, 4),
                     "deltaDec_mas": round(delta_dec, 4)
                 })
@@ -24,8 +24,6 @@ def make_injection_params(separations_mas, contrasts):
     # Convert to DataFrame
     param_table = pd.DataFrame(rows)
     return param_table
-
-if __name__ == '__main__':
 
 separations_mas = np.linspace(0, 65, 5)   # fibre FWHM is 65 mas(?)
 contrasts = np.array([1e-2, 1e-3, 1e-4, 1e-5, 1e-6])
