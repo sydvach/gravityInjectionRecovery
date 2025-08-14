@@ -24,6 +24,6 @@ def make_injection_params(separations_mas, contrasts):
     return param_table
 
 separations_mas = np.linspace(0, 40, 5)   # fibre FWHM is 65 mas(?)
-contrasts = np.array([1e-2, 1e-3, 1e-4, 1e-5, 1e-6])
+contrasts = np.array([1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6])
 param_table = make_injection_params(separations_mas, contrasts)
-param_table.to_csv("injection_parameters.csv", index=False)
+param_table.to_csv("/Users/svach/gravityInjectionRecovery/injection_parameters.csv", index=False)
