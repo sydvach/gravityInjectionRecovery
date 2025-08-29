@@ -14,6 +14,9 @@ from multiprocessing import Pool, cpu_count
 
 from getGravityObs import *
 
+GravityPipelinePath = '/Users/svach/gravi_tools3/'
+InjectionParametersPath = '/Users/svach/gravityInjectionRecovery/injection_parameters.csv'
+
 #def createSyntheticCompanion(wav, visFiber, uCoord, vCoord, visOnStar, contrast, deltaRA, deltaDec):
 def createSyntheticCompanion(dataset, visOnStar, contrast, deltaRA, deltaDec):
     ## synthetic Companioin signal
@@ -68,19 +71,26 @@ def injectionRecovery(args):
         lastOutPath = saveSyntheticReducedData(planetFile, syntheticVISDATA, i, outPath)
 
     subprocess.run(
-        ['python', '/Users/svach/gravi_tools3/run_gravi_astrored_check.py'],
+        ['python', f'{GravityPipelinePath}run_gravi_astrored_check.py'],
         cwd=outPath,
         check=True
     )
+    
     subprocess.run(
-        ['python', '/Users/svach/gravi_tools3/run_gravi_astrored_astrometry.py', '--reDo=TRUE'],
+        ['python', f'{GravityPipelinePath}run_gravi_astrored_astrometry.py', '--reDo=TRUE'],
+        cwd=outPath,
+        check=True
+    )
+    
+    subprocess.run(
+        ['rm', f'{planetFiles}'],
         cwd=outPath,
         check=True
     )
 #    os.system('python /Users/svach/gravi_tools3/run_gravi_astrored_check.py')
 #    os.system('python /Users/svach/gravi_tools3/run_gravi_astrored_astrometry.py --reDo=TRUE')
             
-def run(filePaths, resetPoint=8, injectionPath = '/Users/svach/gravityInjectionRecovery/injection_parameters.csv'):
+def run(filePaths, resetPoint=8, injectionPath = InjectionParametersPath):
 #    sys.stdout = open(os.devnull, 'w')
 
     injectionParams = pd.read_csv(injectionPath)[resetPoint:]
@@ -121,12 +131,7 @@ def run(filePaths, resetPoint=8, injectionPath = '/Users/svach/gravityInjectionR
 
 if __name__ == '__main__':
     
-    filePaths = [
-#                '/Users/svach/GravityGaia/p115/2025-08-10/SCI_HD 14082B_search1/reduced/',
-#                        '/Users/svach/GravityGaia/p115/2025-08-09/SCI_HD 218396_search2/reduced/',
-                            '/Users/svach/GravityGaia/p115/2025-08-09/SCI_G 80-21_search_cc/reduced/',
-#                            '/Users/svach/GravityGaia/p115/2025-06-12/SCI_HD 111588_search3/reduced/'
- 	]
+    filePaths = [sys.args[1]]
     run(filePaths, resetPoint=0)
 
 
